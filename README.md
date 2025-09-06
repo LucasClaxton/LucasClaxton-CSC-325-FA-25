@@ -1,8 +1,8 @@
 Assignment 2:
-Levels completed:
-Level 1: Yes.
-Level 2: Yes.
-Level 3: No.
+  Levels completed:
+    Level 1: Yes.
+    Level 2: Yes.
+    Level 3: No.
 
 AI Reflection:
   Level 1:
