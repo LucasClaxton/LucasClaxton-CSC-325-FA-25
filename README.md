@@ -27,4 +27,7 @@ Assignment 3:
 
 AI Reflection:
   Level 1:
-    I used Copilot to get a skeleton for the project and after adding my own code and trying to get the packaging to work properly, I asked Copilot how it would improve the code, and in total Copilot made a change to the base shape classes, but left the shape classes with "2" in them alone. I then added a Main class without AI help.
+    I used Copilot to get a skeleton for the project and after adding my own code and trying to get 
+  the packaging to work properly, I asked Copilot how it would improve the code, and in total Copilot 
+  made a simple performance change to the rectangle and circle classes, but left the rectangle2 and 
+  circle2 classes alone. I then added a Main class without AI help.
