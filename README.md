@@ -1,3 +1,4 @@
+P.S. switch to code view to see the proper layout.
 Assignment 3:
   Levels completed:
     Level 1: Yes.
