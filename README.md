@@ -7,4 +7,4 @@ Assignment 5:
   
 
 AI Reflection:
-  Level 1:
+  Level 1: The only AI I used was to see if the code would work because I could not get the JavaFX libraries to work. Supposedly it will work, but I could never properly test it.
