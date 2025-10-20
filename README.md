@@ -22,3 +22,4 @@ keeps defensive null checks and returns empty lists or 0.0 where the legacy
 code did. Overall the refactor improves clarity and maintainability while
 keeping behavior equivalent to the original.
   
+AI Reflection: The thing I used AI for was the comparison comments because I forgot to keep track of that and also the analysis.
