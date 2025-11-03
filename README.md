@@ -184,9 +184,6 @@ exec.awaitTermination(10, TimeUnit.SECONDS);
 - More scalable: replace `int balance` with `AtomicInteger` and use CAS loop as shown.
 - Use `ExecutorService` to manage threads and avoid manual `Thread` objects.
 
-## AI reflection (meta)
+## AI reflection
 
-I examined the code manually and used reasoning about possible interleavings and the explicit busy-waits to identify the race condition. The nature of the bug and proposed fixes are standard: make the critical check-and-update atomic (either with synchronization or atomic primitives) and reduce lock hold time (remove busy-wait inside critical sections).
-
-AI Reflection:
   I used AI to make sure I spotted all the problems, and then I use it to touch up my grammer because I kept reading it out and I didn't like how it was sounding even after changing it.
