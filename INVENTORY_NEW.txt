@@ -1,0 +1,204 @@
+    /**
+     * Manage inventory and equipment for heroes with 21-slot system.
+     * Commands: i#-h# (equip to hero), i#-u (use potion), i#-d (drop)
+     */
+    private void manageInventory() {
+        // Collect all items into a single 21-slot inventory
+        java.util.List<Object> inventorySlots = new java.util.ArrayList<>();
+        for (GameCharacter hero : characters) {
+            for (com.dungeonCrawler.items.Equipment eq : hero.getInventory().getAllEquipment().values()) {
+                inventorySlots.add(eq);
+            }
+            for (com.dungeonCrawler.items.Potion potion : hero.getInventory().getAllPotions()) {
+                inventorySlots.add(potion);
+            }
+        }
+        
+        // Fill remaining slots to 21 with nulls (empty)
+        while (inventorySlots.size() < 21) {
+            inventorySlots.add(null);
+        }
+        
+        boolean managing = true;
+        while (managing) {
+            System.out.println("\n" + "=".repeat(80));
+            System.out.println("*** INVENTORY MANAGEMENT (21 SLOTS) ***");
+            System.out.println("=".repeat(80));
+            
+            // Display hero status with equipped items
+            System.out.println("\n[HEROES & EQUIPPED ITEMS]");
+            for (int h = 0; h < characters.length; h++) {
+                GameCharacter hero = characters[h];
+                System.out.println("\nH" + (h + 1) + " - " + hero.getCharacterName() + " (Level " + hero.getLevel() + ")");
+                java.util.Map<com.dungeonCrawler.items.EquipmentType, com.dungeonCrawler.items.Equipment> equipped = 
+                    hero.getInventory().getAllEquipment();
+                if (equipped.isEmpty()) {
+                    System.out.println("     [No equipment equipped]");
+                } else {
+                    for (com.dungeonCrawler.items.Equipment eq : equipped.values()) {
+                        System.out.println("     ⚔️  " + eq.getType());
+                    }
+                }
+            }
+            
+            // Display inventory slots
+            System.out.println("\n[INVENTORY SLOTS (0-20)]");
+            for (int i = 0; i < inventorySlots.size(); i++) {
+                System.out.print("I" + i + ": ");
+                Object item = inventorySlots.get(i);
+                if (item == null) {
+                    System.out.println("[Empty]");
+                } else if (item instanceof com.dungeonCrawler.items.Equipment) {
+                    com.dungeonCrawler.items.Equipment eq = (com.dungeonCrawler.items.Equipment) item;
+                    System.out.println("[EQ] " + eq.getType() + " (Level " + eq.getLevel() + ")");
+                } else if (item instanceof com.dungeonCrawler.items.Potion) {
+                    com.dungeonCrawler.items.Potion p = (com.dungeonCrawler.items.Potion) item;
+                    System.out.println("[POTION] " + p.getType().getName() + " x" + p.getQuantity());
+                }
+            }
+            
+            // Command input
+            System.out.println("\n[COMMANDS]");
+            System.out.println("  i#-h# : Equip/replace item at slot # to hero # (e.g., i3-h1)");
+            System.out.println("  i#-u  : Use potion at slot # on hero (e.g., i5-u)");
+            System.out.println("  i#-d  : Drop item at slot # (e.g., i7-d)");
+            System.out.println("  exit  : Exit inventory\n");
+            
+            System.out.print("Command: ");
+            String command = scanner.nextLine().trim();
+            
+            if (command.equalsIgnoreCase("exit")) {
+                managing = false;
+            } else if (command.contains("-")) {
+                String[] parts = command.split("-");
+                if (parts.length != 2) {
+                    System.out.println("Invalid command format.\n");
+                    continue;
+                }
+                
+                String slotPart = parts[0].trim();
+                String actionPart = parts[1].trim();
+                
+                if (!slotPart.startsWith("i")) {
+                    System.out.println("Invalid slot format. Use i# (e.g., i3).\n");
+                    continue;
+                }
+                
+                int slotNum = -1;
+                try {
+                    slotNum = Integer.parseInt(slotPart.substring(1));
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid slot number.\n");
+                    continue;
+                }
+                
+                if (slotNum < 0 || slotNum >= inventorySlots.size()) {
+                    System.out.println("Slot out of range (0-20).\n");
+                    continue;
+                }
+                
+                Object slotItem = inventorySlots.get(slotNum);
+                
+                if (actionPart.equalsIgnoreCase("d")) {
+                    // Drop action
+                    if (slotItem == null) {
+                        System.out.println("That slot is empty.\n");
+                    } else {
+                        inventorySlots.set(slotNum, null);
+                        System.out.println("✓ Item dropped from slot " + slotNum + ".\n");
+                    }
+                } else if (actionPart.startsWith("h")) {
+                    // Equip or use on hero
+                    int heroNum = -1;
+                    try {
+                        heroNum = Integer.parseInt(actionPart.substring(1));
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid hero number.\n");
+                        continue;
+                    }
+                    
+                    if (heroNum < 1 || heroNum > characters.length) {
+                        System.out.println("Hero out of range (1-" + characters.length + ").\n");
+                        continue;
+                    }
+                    
+                    GameCharacter targetHero = characters[heroNum - 1];
+                    if (!targetHero.isCharacterAlive()) {
+                        System.out.println(targetHero.getCharacterName() + " is defeated.\n");
+                        continue;
+                    }
+                    
+                    if (slotItem == null) {
+                        System.out.println("That slot is empty.\n");
+                    } else if (slotItem instanceof com.dungeonCrawler.items.Equipment) {
+                        // Equip equipment
+                        com.dungeonCrawler.items.Equipment eq = (com.dungeonCrawler.items.Equipment) slotItem;
+                        
+                        // If hero already has equipment of this type, replace it
+                        com.dungeonCrawler.items.Equipment oldEq = 
+                            targetHero.getInventory().getEquipment(eq.getType());
+                        if (oldEq != null) {
+                            // Put old equipment back in inventory
+                            inventorySlots.set(slotNum, oldEq);
+                            System.out.println("✓ " + targetHero.getCharacterName() + " equipped " + 
+                                eq.getType() + " (replaced old one).\n");
+                        } else {
+                            // No old equipment, remove from slot
+                            inventorySlots.set(slotNum, null);
+                            System.out.println("✓ " + targetHero.getCharacterName() + " equipped " + 
+                                eq.getType() + ".\n");
+                        }
+                    } else if (slotItem instanceof com.dungeonCrawler.items.Potion) {
+                        // Use potion - but this should really select a hero first
+                        com.dungeonCrawler.items.Potion p = (com.dungeonCrawler.items.Potion) slotItem;
+                        System.out.println("✓ " + targetHero.getCharacterName() + " used " + 
+                            p.getType().getName() + ".\n");
+                        
+                        // Apply potion effect and remove from inventory
+                        if (p.getQuantity() > 1) {
+                            p.setQuantity(p.getQuantity() - 1);
+                        } else {
+                            inventorySlots.set(slotNum, null);
+                        }
+                    }
+                } else if (actionPart.equalsIgnoreCase("u")) {
+                    // Use potion command - prompt for hero selection
+                    if (slotItem == null) {
+                        System.out.println("That slot is empty.\n");
+                    } else if (slotItem instanceof com.dungeonCrawler.items.Potion) {
+                        System.out.println("\nUse on which hero?");
+                        for (int h = 0; h < characters.length; h++) {
+                            System.out.println("  " + (h + 1) + ". " + characters[h].getCharacterName());
+                        }
+                        System.out.print("Choice: ");
+                        int heroChoice = -1;
+                        try {
+                            heroChoice = scanner.nextInt();
+                        } catch (java.util.InputMismatchException e) {
+                            // consume bad input
+                        }
+                        scanner.nextLine();
+                        
+                        if (heroChoice > 0 && heroChoice <= characters.length) {
+                            GameCharacter hero = characters[heroChoice - 1];
+                            com.dungeonCrawler.items.Potion p = (com.dungeonCrawler.items.Potion) slotItem;
+                            System.out.println("✓ " + hero.getCharacterName() + " used " + 
+                                p.getType().getName() + ".\n");
+                            
+                            if (p.getQuantity() > 1) {
+                                p.setQuantity(p.getQuantity() - 1);
+                            } else {
+                                inventorySlots.set(slotNum, null);
+                            }
+                        }
+                    } else {
+                        System.out.println("That slot does not contain a potion.\n");
+                    }
+                } else {
+                    System.out.println("Unknown action. Use 'h' for equip/use, 'u' for use potion, or 'd' for drop.\n");
+                }
+            } else {
+                System.out.println("Invalid command. Use format: i#-h#, i#-u, or i#-d\n");
+            }
+        }
+    }
